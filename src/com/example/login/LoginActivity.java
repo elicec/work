@@ -1,5 +1,11 @@
 package com.example.login;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import com.elicec.dfss.HttpRequestHelper;
 import com.elicec.dfss.MyApplication;
 
@@ -32,6 +38,7 @@ public class LoginActivity extends Activity {
 	private Button loginbtn;
 	private EditText username;
 	private EditText password;
+	private EditText validEdit;
 	private Thread mThread;
 	private Drawable mIconPerson;
 	private Drawable mIconLock;
@@ -74,6 +81,7 @@ public class LoginActivity extends Activity {
 
 	public void init() {
 		
+		validEdit=(EditText) findViewById(R.id.validtext);
 		validPic=(ImageView) findViewById(R.id.validpic);
 		topText = (TextView) findViewById(R.id.topname);
 		topText.setTextColor(Color.MAGENTA);
@@ -99,7 +107,12 @@ public class LoginActivity extends Activity {
 					v.getBackground().setAlpha(20);
 				} else if (event.getAction() == MotionEvent.ACTION_UP) {
 					v.getBackground().setAlpha(255);
-
+					try {
+						login();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				return true;
 			}
@@ -134,6 +147,21 @@ public class LoginActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
+	}
+	private boolean login() throws Exception{
+		
+		List<NameValuePair> params=new ArrayList<NameValuePair>();
+		NameValuePair pairMethod=new BasicNameValuePair("AjaxMethod", "LOGIN");
+		NameValuePair pairAccount=new BasicNameValuePair("Account", username.getText().toString());
+		NameValuePair pairPwd=new BasicNameValuePair("Pwd", password.getText().toString());
+		NameValuePair pairValidCode =new BasicNameValuePair("ValidCode", validEdit.getText().toString());
+		params.add(pairValidCode);
+		params.add(pairPwd);
+		params.add(pairAccount);
+		params.add(pairMethod);
+		String retS=HttpRequestHelper.loginDfss(MyApplication.URLLogin, params, this);
+		if(retS.length()==4)return true;
+		else return false;
 	}
 
 }

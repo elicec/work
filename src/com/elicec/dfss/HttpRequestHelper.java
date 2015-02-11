@@ -1,6 +1,7 @@
 package com.elicec.dfss;
 
 import java.io.BufferedReader;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +9,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import android.content.Context;
 
 public class HttpRequestHelper {
 
@@ -31,8 +45,45 @@ public class HttpRequestHelper {
 		return imagearray;
 
 	}
+	public static String doHttpPostByApache(String urlStr, List<NameValuePair> params,CookieStore cookie)throws Exception{
+		HttpPost httpPost=new HttpPost(urlStr);
+		HttpEntity httpentity = new UrlEncodedFormEntity(params, "utf-8");
+		httpPost.setEntity(httpentity);
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		httpclient.setCookieStore(cookie);
+		HttpResponse httpResponse = httpclient.execute(httpPost);
+		if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) 
+	    {
+	     String strResult = EntityUtils.toString(httpResponse.getEntity());
+	      return strResult;
+	    } 
+	  else 
+	    {
+	     return "Ê§°Ü";
+	    }
+	}
 
-	public static String executeHttpPost(String urlStr, String postData) {
+	public static String loginDfss(String urlStr,List<NameValuePair> params,Context context)throws Exception{
+		String retStr;
+		HttpPost httpPost=new HttpPost(urlStr);
+		HttpEntity httpentity = new UrlEncodedFormEntity(params, "utf-8");
+		httpPost.setEntity(httpentity);
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpResponse httpResponse = httpclient.execute(httpPost);
+		MyApplication myAPP=(MyApplication)context.getApplicationContext();
+		
+		if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) 
+	    {
+	      retStr= EntityUtils.toString(httpResponse.getEntity());
+	      myAPP.setmCookieStore(httpclient.getCookieStore());
+	      return retStr;
+	    } 
+	  else 
+	    {
+	     return "Ê§°Ü";
+	    }
+	}
+	public static String doHttpPostByAndroid(String urlStr, String postData) {
 		String result = null;
 		URL url = null;
 		HttpURLConnection connection = null;
@@ -78,7 +129,8 @@ public class HttpRequestHelper {
 		return result;
 	}
 
-	public static String doHttpGet(String urlStr) {
+	public static String doHttpGetByandroid(String urlStr) {
+		
 		String result = null;
 		URL url = null;
 		HttpURLConnection connection = null;
@@ -110,5 +162,11 @@ public class HttpRequestHelper {
 
 		}
 		return result;
+	}
+	
+	public static String getPersonInfo(){
+		
+		String jsonString= doHttpPostByAndroid(MyApplication.URLUserInfo, MyApplication.PostDataPersonInfo);
+		
 	}
 }
